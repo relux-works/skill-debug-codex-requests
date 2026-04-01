@@ -21,14 +21,18 @@ It is useful when you need to debug:
 
 ## Install
 
-Clone or copy this repository into your Codex skills directory so the folder name stays `debug-codex-requests`.
-
-One simple layout is:
+Use the standalone installer to install or update the managed copy:
 
 ```bash
-mkdir -p ~/.codex/skills
-git clone git@github.com:ivanopcode/skill-debug-codex-requests.git ~/.codex/skills/debug-codex-requests
+./setup.sh global --locale ru-en
 ```
+
+This creates a managed runtime copy in:
+
+- `${XDG_DATA_HOME:-~/.local/share}/agents/skills/skill-debug-codex-requests`
+- Symlinks in `~/.claude/skills/debug-codex-requests` and `~/.codex/skills/debug-codex-requests`
+
+The setup flow also registers localized triggers in `~/.agents/.instructions/INSTRUCTIONS_SKILL_TRIGGERS.md` for automatic skill activation.
 
 ## Main Flows
 

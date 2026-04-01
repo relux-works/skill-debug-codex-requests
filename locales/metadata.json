@@ -1,0 +1,38 @@
+{
+  "locales": {
+    "en": {
+      "description": "Capture and inspect outgoing Codex API requests by routing a fresh Codex CLI run through a local OpenAI-compatible proxy, then summarize request metadata. Use when you need request-size, tool-surface, injection, model/override, or throughput diagnostics including TTFT and tokens-per-second.",
+      "display_name": "debug-codex-requests",
+      "short_description": "Codex request capture and inspection",
+      "default_prompt": "Use $debug-codex-requests to run a proxied Codex session and inspect the outgoing request metadata, especially when debugging request size, tool schema, system prompt, or context leaks.",
+      "local_prefix": "[local] ",
+      "triggers": [
+        "debug codex requests",
+        "inspect codex request",
+        "capture codex api request",
+        "codex proxy log",
+        "codex request payload",
+        "codex system prompt",
+        "codex tool schema",
+        "debug codex outbound requests"
+      ]
+    },
+    "ru": {
+      "description": "Перехвати и проверь исходящие запросы Codex через локальный OpenAI-совместимый прокси, затем сведи метаданные запроса. Используй для диагностики размера запроса, набора инструментов, инъекций, различий моделей/переопределений или throughput-показателей, включая TTFT и tokens-per-second.",
+      "display_name": "debug-codex-requests",
+      "short_description": "Отладка исходящих запросов Codex",
+      "default_prompt": "Используй $debug-codex-requests для проксирования сессии Codex и проверки метаданных исходящего запроса, особенно для анализа размера запроса, схемы инструментов, system_prompt или утечки контекста.",
+      "local_prefix": "[локально] ",
+      "triggers": [
+        "отладка codex запросов",
+        "проверить запросы codex",
+        "поймать запросы codex",
+        "лог запроса codex",
+        "payload codex",
+        "system_prompt codex",
+        "схема инструментов codex",
+        "диагностика codex прокси"
+      ]
+    }
+  }
+}

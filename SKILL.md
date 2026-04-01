@@ -1,6 +1,19 @@
 ---
 name: debug-codex-requests
 description: Capture and inspect outgoing Codex API requests by routing a fresh Codex CLI run through a local OpenAI-compatible proxy, then summarize the logged request metadata. Use when Codex needs to debug request size, injected instructions, exposed tools, model or provider overrides, profile differences, skill/context leakage, or model throughput such as TTFT and tokens-per-second; prefer the isolated subagent workflow for the proxy and the diagnostic Codex run.
+triggers:
+  - debug-codex-requests
+  - "debug codex requests"
+  - "inspect codex request"
+  - "capture codex api request"
+  - "codex proxy log"
+  - "codex request payload"
+  - "codex system prompt"
+  - "codex tool schema"
+  - "отладка codex запросов"
+  - "проверить запросы codex"
+  - "поймать запросы codex"
+  - "диагностика codex прокси"
 ---
 
 # Debug Codex Requests
