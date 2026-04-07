@@ -38,6 +38,8 @@ The diagnostic run uses the model named by the user, with exact or approximate m
 ## Included Files
 
 - `SKILL.md` with the operational contract and workflow
+- `locales/metadata.json` with localized user-facing metadata
+- `.skill_triggers/<locale>.md` as the single source of truth for localized trigger catalogs
 - `scripts/codex_proxy.py` for request capture and forwarding
 - `scripts/inspect_proxy_log.py` for log inspection
 - `scripts/run_codex_benchmark.py` for throughput benchmarking
@@ -48,10 +50,12 @@ The diagnostic run uses the model named by the user, with exact or approximate m
 Install or update the managed copy with:
 
 ```bash
-./setup.sh global --locale ru-en
+make install MODE=global LOCALE=ru-en
 ```
 
-This creates a managed runtime copy under `${XDG_DATA_HOME:-~/.local/share}/agents/skills/skill-debug-codex-requests`, updates localized metadata, and refreshes the symlinks in `~/.claude/skills/debug-codex-requests` and `~/.codex/skills/debug-codex-requests`.
+This creates a managed runtime copy under `${XDG_DATA_HOME:-~/.local/share}/agents/skills/skill-debug-codex-requests`, renders localized metadata plus trigger previews from `.skill_triggers`, and refreshes the symlinks in `~/.claude/skills/skill-debug-codex-requests` and `~/.codex/skills/skill-debug-codex-requests`.
+
+For backward compatibility, `./setup.sh global --locale ...` still works as a thin wrapper around the same install flow.
 
 ## License
 

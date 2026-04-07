@@ -1,38 +1,18 @@
 {
   "locales": {
     "en": {
-      "description": "Execute a fresh proxied Codex run, inspect the captured log, and summarize what Codex actually sent. Use when you need request payload, injected instructions or system prompt, tool exposure, model or provider override, profile difference, context leakage, or throughput diagnostics including TTFT and tokens-per-second.",
+      "description": "Codex request diagnostics: capture a proxied run, inspect the provider request, and summarize payload, instructions, tools, overrides, and throughput.",
       "display_name": "Debug Codex Requests",
-      "short_description": "Execute and inspect Codex requests",
-      "default_prompt": "Use $debug-codex-requests to run the proxied Codex workflow end-to-end, inspect the captured log, apply model fallbacks if needed, and summarize what Codex actually sent.",
-      "local_prefix": "[local] ",
-      "triggers": [
-        "debug codex requests",
-        "inspect codex request",
-        "capture codex api request",
-        "codex proxy log",
-        "codex request payload",
-        "codex system prompt",
-        "codex tool schema",
-        "debug codex outbound requests"
-      ]
+      "short_description": "Capture and inspect Codex requests",
+      "default_prompt": "Use $debug-codex-requests to run the proxied Codex workflow end-to-end, inspect the captured log, and summarize what Codex actually sent.",
+      "local_prefix": "[local] "
     },
     "ru": {
-      "description": "Выполни свежий проксированный запуск Codex, проверь захваченный лог и сведи, что именно Codex отправил провайдеру. Используй для диагностики payload запроса, injected instructions или system prompt, набора инструментов, model или provider override, различий профилей, утечки контекста и throughput-показателей, включая TTFT и tokens-per-second.",
+      "description": "Диагностика запросов Codex: захватить проксированный запуск, проверить запрос к провайдеру и свести payload, instructions, tools, override и throughput.",
       "display_name": "Debug Codex Requests",
-      "short_description": "Выполнить и проверить запросы Codex",
-      "default_prompt": "Используй $debug-codex-requests, чтобы выполнить проксированный workflow Codex до конца, проверить захваченный лог, при необходимости применить model fallback и свести, что именно Codex отправил.",
-      "local_prefix": "[локально] ",
-      "triggers": [
-        "отладка codex запросов",
-        "проверить запросы codex",
-        "поймать запросы codex",
-        "лог запроса codex",
-        "payload codex",
-        "system_prompt codex",
-        "схема инструментов codex",
-        "диагностика codex прокси"
-      ]
+      "short_description": "Поймать и проверить запросы Codex",
+      "default_prompt": "Используй $debug-codex-requests, чтобы выполнить проксированный workflow Codex до конца, проверить захваченный лог и свести, что именно Codex отправил.",
+      "local_prefix": "[локально] "
     }
   }
 }

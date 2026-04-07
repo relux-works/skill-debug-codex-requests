@@ -1,0 +1,8 @@
+- отладка codex запросов
+- проверить запросы codex
+- поймать запросы codex
+- лог запроса codex
+- payload codex
+- system_prompt codex
+- схема инструментов codex
+- диагностика codex прокси

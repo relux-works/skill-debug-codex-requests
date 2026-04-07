@@ -1,4 +1,4 @@
 interface:
   display_name: "Debug Codex Requests"
-  short_description: "Execute a proxied Codex capture and summarize findings"
-  default_prompt: "Use $debug-codex-requests to run the proxied Codex workflow end-to-end, inspect the captured log, apply model fallbacks if needed, and summarize what Codex actually sent."
+  short_description: "Capture and inspect Codex requests"
+  default_prompt: "Use $debug-codex-requests to run the proxied Codex workflow end-to-end, inspect the captured log, and summarize what Codex actually sent."

@@ -15,8 +15,8 @@ from setup_support import (
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="setup.sh",
-        description="Install a standalone skill into global or project-local agent environments.",
+        prog="make install",
+        description="Install skill-debug-codex-requests into global or project-local agent environments.",
     )
     subparsers = parser.add_subparsers(dest="mode", required=True)
 

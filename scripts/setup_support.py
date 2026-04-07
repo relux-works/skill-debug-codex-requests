@@ -13,18 +13,20 @@ from typing import Any, Callable, Optional
 
 MANIFEST_FILENAME = ".skill-install.json"
 CATALOG_RELATIVE_PATH = Path("locales") / "metadata.json"
+SKILL_TRIGGERS_DIR = Path(".skill_triggers")
 SUPPORTED_BASE_LOCALES = ("en", "ru")
 SUPPORTED_LOCALE_MODES = ("en", "ru", "en-ru", "ru-en")
+TRIGGER_PREVIEW_LIMIT = 6
 REQUIRED_LOCALE_KEYS = (
     "description",
     "display_name",
     "short_description",
     "default_prompt",
     "local_prefix",
-    "triggers",
 )
 OPENAI_YAML_FIELD_TEMPLATE = r"^(\s*{key}:\s*)(.*)$"
 FRONTMATTER_KEY_RE = re.compile(r"^(?P<key>[A-Za-z0-9_-]+):(.*)$")
+TRIGGER_MARKDOWN_ITEM_RE = re.compile(r"^\s*[-*+]\s+(?P<value>.+?)\s*$")
 MARKDOWN_HEADING_RE = re.compile(r"^#{1,6}\s+.*$", re.MULTILINE)
 MODULES_HEADING_RE = re.compile(r"^(?P<level>#{1,6})\s+Modules\s*$", re.MULTILINE)
 SKILL_TRIGGERS_INCLUDE_NAME = "INSTRUCTIONS_SKILL_TRIGGERS.md"
@@ -124,6 +126,57 @@ def unique_strings(values: list[str]) -> list[str]:
         seen.add(key)
         results.append(cleaned)
     return results
+
+
+def strip_optional_quotes(value: str) -> str:
+    cleaned = value.strip()
+    if len(cleaned) >= 2 and (
+        cleaned.startswith('"') and cleaned.endswith('"')
+        or cleaned.startswith("'") and cleaned.endswith("'")
+    ):
+        return cleaned[1:-1].strip()
+    return cleaned
+
+
+def load_locale_triggers(skill_dir: Path, locale: str) -> list[str]:
+    trigger_path = skill_dir / SKILL_TRIGGERS_DIR / f"{locale}.md"
+    try:
+        lines = trigger_path.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError as exc:
+        raise SetupError(f"Missing trigger catalog: {trigger_path}") from exc
+
+    triggers: list[str] = []
+    in_code_block = False
+    for line in lines:
+        normalized = line.strip()
+        if normalized.startswith("```"):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block:
+            continue
+        match = TRIGGER_MARKDOWN_ITEM_RE.match(line)
+        if not match:
+            continue
+        trigger = strip_optional_quotes(match.group("value"))
+        if trigger:
+            triggers.append(trigger)
+    if not triggers:
+        raise SetupError(f"Trigger catalog has no trigger entries: {trigger_path}")
+    return unique_strings(triggers)
+
+
+def trigger_preview_label(locale: str) -> str:
+    if locale == "ru":
+        return "Триггеры:"
+    return "Triggers:"
+
+
+def build_description_with_trigger_preview(description: str, triggers: list[str], locale: str) -> str:
+    preview = triggers[:TRIGGER_PREVIEW_LIMIT]
+    if not preview:
+        return description
+    quoted_preview = ", ".join(yaml_quote(trigger) for trigger in preview)
+    return f"{description} {trigger_preview_label(locale)} {quoted_preview}."
 
 
 def escape_markdown_table_cell(value: str) -> str:
@@ -387,20 +440,19 @@ def write_install_manifest(
     skill_name: str,
     install_mode: str,
     locale_mode: str,
-    source_dir: Path,
-    runtime_dir: Path,
+    source_dir: Optional[Path],
 ) -> None:
     selection = parse_locale_mode(locale_mode)
     payload = {
-        "schema_version": 1,
+        "schema_version": 2,
         "skill_name": skill_name,
         "install_mode": install_mode,
         "locale_mode": selection.mode,
         "primary_locale": selection.primary_locale,
         "secondary_locale": selection.secondary_locale,
-        "source_dir": str(source_dir),
-        "runtime_dir": str(runtime_dir),
     }
+    if source_dir is not None:
+        payload["source_dir"] = str(source_dir)
     install_manifest_path(skill_dir).write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
@@ -439,19 +491,15 @@ def load_metadata_catalog(skill_dir: Path) -> dict[str, dict[str, Any]]:
         normalized_locale: dict[str, Any] = {}
         for key in REQUIRED_LOCALE_KEYS:
             value = locale_payload.get(key)
-            if key == "triggers":
-                if not isinstance(value, list) or not value:
-                    raise SetupError(f"Locale '{locale}' must define a non-empty trigger list in {path}")
-                triggers: list[str] = []
-                for item in value:
-                    if not isinstance(item, str) or not item.strip():
-                        raise SetupError(f"Locale '{locale}' contains an invalid trigger in {path}")
-                    triggers.append(item)
-                normalized_locale[key] = triggers
-                continue
             if not isinstance(value, str) or not value:
                 raise SetupError(f"Locale '{locale}' is missing string field '{key}' in {path}")
             normalized_locale[key] = value
+        if "triggers" in locale_payload:
+            raise SetupError(
+                f"Locale '{locale}' must define triggers only in "
+                f"{skill_dir / SKILL_TRIGGERS_DIR / f'{locale}.md'}, not in {path}"
+            )
+        normalized_locale["triggers"] = load_locale_triggers(skill_dir, locale)
         normalized[locale] = normalized_locale
     return normalized
 
@@ -461,11 +509,20 @@ def build_localized_metadata(skill_dir: Path, locale_mode: str, install_mode: st
     catalog = load_metadata_catalog(skill_dir)
     primary = catalog[selection.primary_locale]
 
-    description = primary["description"]
+    description = build_description_with_trigger_preview(
+        primary["description"],
+        primary["triggers"],
+        selection.primary_locale,
+    )
     triggers = list(primary["triggers"])
     if selection.secondary_locale is not None:
         secondary = catalog[selection.secondary_locale]
-        description = f"{description} / {secondary['description']}"
+        secondary_description = build_description_with_trigger_preview(
+            secondary["description"],
+            secondary["triggers"],
+            selection.secondary_locale,
+        )
+        description = f"{description} / {secondary_description}"
         triggers = unique_strings([*triggers, *secondary["triggers"]])
 
     display_name = primary["display_name"]
@@ -474,7 +531,6 @@ def build_localized_metadata(skill_dir: Path, locale_mode: str, install_mode: st
 
     if install_mode == "local":
         prefix = primary["local_prefix"]
-        description = f"{prefix}{description}"
         display_name = f"{prefix}{display_name}"
         short_description = f"{prefix}{short_description}"
 
@@ -522,6 +578,20 @@ def parse_frontmatter_sections(skill_text: str) -> tuple[list[tuple[str, str]], 
         sections.append((current_key, "".join(current_lines)))
 
     return sections, body
+
+
+def load_skill_entry_name(skill_dir: Path) -> str:
+    skill_md_path = skill_dir / "SKILL.md"
+    sections, _ = parse_frontmatter_sections(skill_md_path.read_text(encoding="utf-8"))
+    for key, section in sections:
+        if key != "name":
+            continue
+        first_line = section.splitlines()[0]
+        _, value = first_line.split(":", 1)
+        resolved = strip_optional_quotes(value)
+        if resolved:
+            return resolved
+    raise SetupError(f"Could not resolve skill entry name from {skill_md_path}")
 
 
 def render_triggers_block(triggers: list[str]) -> str:
@@ -648,6 +718,7 @@ def perform_install(
 ) -> InstallResult:
     source_dir = resolve_source_dir(source_dir).resolve()
     skill_name = source_dir.name
+    skill_entry_name = load_skill_entry_name(source_dir)
 
     if install_mode == "global":
         install_root = Path.home()
@@ -674,7 +745,6 @@ def perform_install(
         install_mode=install_mode,
         locale_mode=locale_mode,
         source_dir=source_dir,
-        runtime_dir=runtime_dir,
     )
     bootstrap_runner(runtime_dir)
 
@@ -684,7 +754,7 @@ def perform_install(
     ensure_skill_link(codex_link_value, codex_link)
     if install_mode == "global":
         metadata = build_localized_metadata(runtime_dir, locale_mode, install_mode)
-        register_global_skill_triggers(skill_name, metadata["triggers"])
+        register_global_skill_triggers(skill_entry_name, metadata["triggers"])
     if install_mode == "local":
         ensure_local_testing_module(install_root)
         ensure_local_agents_entrypoint(install_root)

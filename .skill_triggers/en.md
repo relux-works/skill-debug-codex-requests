@@ -1,0 +1,9 @@
+- debug-codex-requests
+- debug codex requests
+- inspect codex request
+- capture codex api request
+- codex proxy log
+- codex request payload
+- codex system prompt
+- codex tool schema
+- debug codex outbound requests

@@ -1,6 +1,6 @@
 ---
 name: debug-codex-requests
-description: Execute a fresh proxied Codex run, inspect the captured log, and summarize what Codex actually sent. Default to execute plus summarize, not tutorial. Use when debugging request payloads, injected instructions or system prompt, tool exposure, model or provider overrides, profile differences, context leakage, or throughput such as TTFT and tokens-per-second.
+description: Codex request diagnostics: capture a proxied run, inspect the provider request, and summarize payload, instructions, tools, overrides, and throughput.
 triggers:
   - debug-codex-requests
   - "debug codex requests"
@@ -11,14 +11,6 @@ triggers:
   - "codex system prompt"
   - "codex tool schema"
   - "debug codex outbound requests"
-  - "отладка codex запросов"
-  - "проверить запросы codex"
-  - "поймать запросы codex"
-  - "лог запроса codex"
-  - "payload codex"
-  - "system_prompt codex"
-  - "схема инструментов codex"
-  - "диагностика codex прокси"
 ---
 
 # Debug Codex Requests
